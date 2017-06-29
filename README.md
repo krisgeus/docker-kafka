@@ -2,7 +2,7 @@
 
 ## Building the image
 ```
-docker build -f Dockerfile -t docker-zk-kafka
+docker build -f Dockerfile -t docker-kafka .
 ```
 
 ## Configuring the image
@@ -27,19 +27,27 @@ Configuration of kafka can be changed/influenced by setting a set of environment
 To run the image with 2 topics
 
 ```
-docker run -p 2181:2181 -p 9092:9092 \
-  --env ADVERTISED_HOST=127.0.0.1 \
+docker run --rm -p 2181:2181 -p 9092:9092 \
+  --env ADVERTISED_HOST=kafka \
   --env ADVERTISED_PORT=9092 \
   --env KAFKA_CREATE_TOPICS="test:36:1,krisgeus:12:1:compact" \
-  docker-zk-kafka
+  --name kafka \
+  docker-kafka
 ```
 
 ## Testing
 
 Testing if the image works can be done by using the kafka console producer/consumer
+since we named the image we need to add an entry to the `/etc/hosts` file to connect the name kafka to the local ip 127.0.0.1
 
 ```
-kafka-console-producer --broker-list localhost:9092 \
+127.0.0.1	kafka
+```
+
+Now we can use that hostname (the same as the advertised host) to connect the producer and consumer
+
+```
+kafka-console-producer --broker-list kafka:9092 \
   --topic test
 ```
 
@@ -52,7 +60,7 @@ message2
 To consume this use the following in a separate terminal window
 
 ```
-kafka-console-consumer --bootstrap-server localhost:9092 \
+kafka-console-consumer --bootstrap-server kafka:9092 \
   --topic test \
   --from-beginning
   
@@ -63,7 +71,7 @@ message2
 __A compact topic needs a key so remember to start the producer with the mandatory parse.key and key.separator options!__
 
 ```
-kafka-console-producer --broker-list localhost:9092 \
+kafka-console-producer --broker-list kafka:9092 \
   --topic krisgeus \
   --property "parse.key=true" \
   --property "key.separator=:"
@@ -78,7 +86,7 @@ key2:value2
 To consume this use the following in a separate terminal window
 
 ```
-kafka-console-consumer --bootstrap-server localhost:9092 \
+kafka-console-consumer --bootstrap-server kafka:9092 \
   --topic krisgeus \
   --from-beginning
   
