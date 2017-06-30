@@ -23,6 +23,8 @@ ADD scripts/start-kafka.sh /usr/bin/start-kafka.sh
 ADD scripts/start-zookeeper.sh /usr/bin/start-zookeeper.sh
 ADD scripts/create-kafka-topics.sh /usr/bin/create-kafka-topics.sh
 
+ADD config/log4j.properties "$KAFKA_HOME"/config/
+
 # Supervisor config
 ADD supervisor/kafka.ini supervisor/zookeeper.ini supervisor/create-topics.ini /etc/supervisord.d/
 

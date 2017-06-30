@@ -54,4 +54,5 @@ if [ ! -z "$AUTO_CREATE_TOPICS" ]; then
 fi
 
 # Run Kafka
+export EXTRA_ARGS='-name kafkaServer' # no -loggc to minimize logging
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
