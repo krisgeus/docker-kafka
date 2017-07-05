@@ -53,6 +53,16 @@ if [ ! -z "$AUTO_CREATE_TOPICS" ]; then
     fi
 fi
 
+if grep -r -q "^#\?listeners=" $KAFKA_HOME/config/server.properties; then
+    sed -r -i "s/#?(listeners)=(.*)/\1=PLAINTEXT:\/\/localhost:9092/g" $KAFKA_HOME/config/server.properties
+else
+    echo "listeners=PLAINTEXT://localhost:9092" >> $KAFKA_HOME/config/server.properties
+fi
+
 # Run Kafka
+
+# show config
+cat $KAFKA_HOME/config/server.properties
+
 export EXTRA_ARGS='-name kafkaServer' # no -loggc to minimize logging
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
