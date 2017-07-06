@@ -13,8 +13,10 @@ Configuration of kafka can be changed/influenced by setting a set of environment
 
 |env var|default|options|description|
 | --- | --- | --- | --- |  
-| ADVERTISED_HOST |  |  | Hostname the application binds on |
-| ADVERTISED_PORT  | 9092 |  | The port the application runs on |
+| ADVERTISED_LISTENERS |  |  | the listeners advertised to the outside world with associated listener name |
+| LISTENERS  |  |  | the listeners being created by the broker with their associated name |
+| SECURITY_PROTOCOL_MAP  |  |  |  mapping from the listener names to security protocol |
+| INTER_BROKER  |  |  |  the listener name the internal connections will use |
 | LOG\_RETENTION_HOURS | 168 |   | Number of hours the messages are kept in the topic log |
 | LOG\_RETENTION_BYTES | 1073741824 |  | Size of the topic logs at which pruning will take place|
 | NUM_PARTITIONS | 1 |  | Default number of partitions for a topic | 
@@ -24,15 +26,18 @@ Configuration of kafka can be changed/influenced by setting a set of environment
 
 
 ## Running the image
-To run the image with 2 topics
+To run the image with 2 topics, advertising an internal (9092) and external listener (443). This example is useful when you have some kind 
+of edge termination for ssl externally or port mapping, e.g. port 443 external SSL --> port 9092 internal.
 
 ```
-docker run --rm -p 2181:2181 -p 9092:9092 \
-  --env ADVERTISED_HOST=kafka \
-  --env ADVERTISED_PORT=9092 \
+docker run --rm -p 2181:2181 -p 9092:9092 -p 9093:9093 \
+  --env ADVERTISED_LISTENERS=PLAINTEXT://kafka:443,INTERNAL://localhost:9093 \
+  --env LISTENERS=PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:9093 \
+  --env SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT \
+  --env INTER_BROKER=INTERNAL \
   --env KAFKA_CREATE_TOPICS="test:36:1,krisgeus:12:1:compact" \
   --name kafka \
-  docker-kafka
+  krisgeus/docker-kafka
 ```
 
 ## Testing
