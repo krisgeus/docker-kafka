@@ -32,7 +32,7 @@ RUN mkdir -p /tmp/zookeeper && \
     chmod -R 777 /var/log/supervisor/ && \
     chmod -R 777 /var/run/ && \
     chmod -R 777 "$KAFKA_HOME"/logs && \
-    chmod 777 "$KAFKA_HOME"/config/server.properties && \
+    chmod -R 777 "$KAFKA_HOME"/config && \
     chmod -R 777  /tmp/zookeeper && \
     chmod -R 777  /tmp/kafka-logs
 
