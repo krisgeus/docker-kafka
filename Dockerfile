@@ -10,7 +10,7 @@ ENV JAVA_HOME /opt/jdk1.8.0_131
 # Install Kafka, Zookeeper and other needed things
 RUN yum update -y && \
 	yum install -y epel-release && \
-    yum install -y wget supervisor && \
+    yum install -y wget supervisor netcat && \
     wget -q http://apache.mirrors.spacedump.net/kafka/"$KAFKA_VERSION"/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -O /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
     tar xfz /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -C /opt && \
     rm /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
