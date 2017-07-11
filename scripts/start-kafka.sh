@@ -74,5 +74,21 @@ if [ ! -z "$INTER_BROKER" ]; then
     fi
 fi
 
+if echo "$SECURITY_PROTOCOL_MAP" | grep -r -q ":SSL"; then
+    if [ -z "$SSL_PASSWORD" ]; then
+        SSL_PASSWORD=`date +%s | sha256sum | base64 | head -c 32`
+    fi
+    if [ ! -z "$SSL_CERT" ]; then
+        echo "${SSL_CERT}" >> /var/private/ssl/server/cert.pem
+        openssl x509 -outform der -in /var/private/ssl/server/cert.pem -out /var/private/ssl/server/cert.der
+        ${JAVA_HOME}/bin/keytool -import -alias localhost -keystore /var/private/ssl/server.keystore.jks -file /var/private/ssl/server/cert.der -noprompt --storepass ${SSL_PASSWORD} --keypass ${SSL_PASSWORD}
+    else
+        ${JAVA_HOME}/bin/keytool -genkey -noprompt -alias localhost -dname "${SSL_DN}" -keystore /var/private/ssl/server.keystore.jks --storepass ${SSL_PASSWORD} --keypass ${SSL_PASSWORD}
+    fi
+    echo "ssl.keystore.location=/var/private/ssl/server.keystore.jks" >> $KAFKA_HOME/config/server.properties
+    echo "ssl.keystore.password=${SSL_PASSWORD}" >> $KAFKA_HOME/config/server.properties
+    echo "ssl.key.password=${SSL_PASSWORD}" >> $KAFKA_HOME/config/server.properties
+fi
+
 export EXTRA_ARGS='-name kafkaServer' # no -loggc to minimize logging
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties

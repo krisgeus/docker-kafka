@@ -16,6 +16,9 @@ Configuration of kafka can be changed/influenced by setting a set of environment
 | ADVERTISED_LISTENERS |  |  | the listeners advertised to the outside world with associated listener name |
 | LISTENERS  |  |  | the listeners being created by the broker with their associated name |
 | SECURITY_PROTOCOL_MAP  |  |  |  mapping from the listener names to security protocol |
+| SSL_CERT |  |  |  Optional pem certificate and key |
+| SSL_DN |  |  |  Optional subject to use for the generated certificate, e.g. CN=kafka.example.com,OU=data,O=example,L=Kris,S=Geus,C=NL |
+| SSL_PASSWORD |  |  |  Optional password to use for the store and key otherwise will be automatically generated |
 | INTER_BROKER  |  |  |  the listener name the internal connections will use |
 | LOG\_RETENTION_HOURS | 168 |   | Number of hours the messages are kept in the topic log |
 | LOG\_RETENTION_BYTES | 1073741824 |  | Size of the topic logs at which pruning will take place|

@@ -10,7 +10,7 @@ ENV JAVA_HOME /opt/jdk1.8.0_131
 # Install Kafka, Zookeeper and other needed things
 RUN yum update -y && \
 	yum install -y epel-release && \
-    yum install -y wget supervisor nc && \
+    yum install -y wget supervisor nc openssl && \
     wget -q http://apache.mirrors.spacedump.net/kafka/"$KAFKA_VERSION"/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -O /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
     tar xfz /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -C /opt && \
     rm /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
@@ -29,12 +29,14 @@ RUN mkdir -p /tmp/zookeeper && \
     mkdir -p /tmp/kafka-logs && \
     mkdir -p /var/log/supervisor && \
     mkdir "$KAFKA_HOME"/logs && \
+    mkdir -p /var/private/ssl/ && \
     chmod -R 777 /var/log/supervisor/ && \
     chmod -R 777 /var/run/ && \
     chmod -R 777 "$KAFKA_HOME"/logs && \
     chmod -R 777 "$KAFKA_HOME"/config && \
     chmod -R 777  /tmp/zookeeper && \
-    chmod -R 777  /tmp/kafka-logs
+    chmod -R 777  /tmp/kafka-logs && \
+    chmod -R 777 /var/private/ssl
 
 # Supervisor config
 ADD supervisor/kafka.ini supervisor/zookeeper.ini supervisor/create-topics.ini /etc/supervisord.d/
