@@ -41,7 +41,7 @@ RUN mkdir -p /tmp/zookeeper && \
 # Supervisor config
 ADD supervisor/kafka.ini supervisor/zookeeper.ini supervisor/create-topics.ini /etc/supervisord.d/
 
-# 2181 is zookeeper, 9092 is kafka
-EXPOSE 2181 9092
+# 2181 is zookeeper, 9092-9099 is kafka (for different listeners like SSL, INTERNAL, PLAINTEXT etc.)
+EXPOSE 2181 9092 9093 9094 9095 9096 9097 9098 9099
 
 CMD ["supervisord", "-n"]
