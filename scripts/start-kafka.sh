@@ -79,6 +79,7 @@ if echo "$SECURITY_PROTOCOL_MAP" | grep -r -q ":SSL"; then
         SSL_PASSWORD=`date +%s | sha256sum | base64 | head -c 32`
     fi
     if [ ! -z "$SSL_CERT" ]; then
+        mkdir -p /var/private/ssl/server/
         echo "${SSL_CERT}" >> /var/private/ssl/server/cert.pem
         openssl x509 -outform der -in /var/private/ssl/server/cert.pem -out /var/private/ssl/server/cert.der
         ${JAVA_HOME}/bin/keytool -import -alias localhost -keystore /var/private/ssl/server.keystore.jks -file /var/private/ssl/server/cert.der -noprompt --storepass ${SSL_PASSWORD} --keypass ${SSL_PASSWORD}
