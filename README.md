@@ -16,7 +16,8 @@ Configuration of kafka can be changed/influenced by setting a set of environment
 | ADVERTISED_LISTENERS |  |  | the listeners advertised to the outside world with associated listener name |
 | LISTENERS  |  |  | the listeners being created by the broker with their associated name |
 | SECURITY_PROTOCOL_MAP  |  |  |  mapping from the listener names to security protocol |
-| SSL_CERT |  |  |  Optional pem certificate and key |
+| SSL_CERT |  |  |  Optional pem certificate |
+| SSL_KEY  |  |  |  Optional ssl private key |
 | SSL_DN |  |  |  Optional subject to use for the generated certificate, e.g. CN=kafka.example.com,OU=data,O=example,L=Kris,S=Geus,C=NL |
 | SSL_PASSWORD |  |  |  Optional password to use for the store and key otherwise will be automatically generated |
 | INTER_BROKER  |  |  |  the listener name the internal connections will use |
@@ -101,3 +102,45 @@ kafka-console-consumer --bootstrap-server kafka:9092 \
 value1
 value2
 ```
+## SSL key and cert example
+
+1. generate a private key
+
+```
+openssl genrsa -des3 -passout pass:apachepass -out pass.key 2048
+openssl rsa -passin pass:apachepass -in pass.key -out ssl.key
+```
+
+2. generate a cert
+
+```
+openssl req -new -key ssl.key -out fqdn.csr -subj "/C=/ST=/L=/O=/CN=domain”
+```
+
+3. cert self-signing 
+
+```
+openssl x509 -req -days 365 -in fqdn.csr -signkey ssl.key -out selfsign.crt
+```
+
+4. passning a key and cert to the docker
+
+```
+--env SSL_CERT="`cat selfsign.crt`" \
+--env SSL_KEY="`cat /ssl.key`" \
+```
+
+5. generate a client truststore
+
+```
+keytool -import -alias localhost -keystore client.truststore.jks -file selfsign.crt -noprompt --storepass secretpass --keypass secretpass
+```
+
+6. kafka client config
+
+```
+security.protocol=SSL
+ssl.truststore.location=client.truststore.jks
+ssl.truststore.password=secretpass
+```
+
