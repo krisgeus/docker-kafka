@@ -82,8 +82,8 @@ if echo "$SECURITY_PROTOCOL_MAP" | grep -r -q ":SSL"; then
         mkdir -p /var/private/ssl/server/
         echo "${SSL_KEY}" >> /var/private/ssl/server/ssl.key
         echo "${SSL_CERT}" >> /var/private/ssl/server/cert.pem
-        openssl pkcs12 -export -in /var/private/ssl/server/cert.pem -inkey /var/private/ssl/server/ssl.key -name localhost -password pass:${SSL_PASSWORD} -out pkcs12.p12
-        ${JAVA_HOME}/bin/keytool -importkeystore -deststorepass ${SSL_PASSWORD} -destkeypass ${SSL_PASSWORD} -destkeystore /var/private/ssl/server.keystore.jks -srckeystore pkcs12.p12 -srcstoretype PKCS12 -srcstorepass ${SSL_PASSWORD} -alias localhost
+        openssl pkcs12 -export -in /var/private/ssl/server/cert.pem -inkey /var/private/ssl/server/ssl.key -name localhost -password pass:${SSL_PASSWORD} -out /var/private/ssl/server/pkcs12.p12
+        ${JAVA_HOME}/bin/keytool -importkeystore -deststorepass ${SSL_PASSWORD} -destkeypass ${SSL_PASSWORD} -destkeystore /var/private/ssl/server.keystore.jks -srckeystore /var/private/ssl/server/pkcs12.p12 -srcstoretype PKCS12 -srcstorepass ${SSL_PASSWORD} -alias localhost
     else  
         ${JAVA_HOME}/bin/keytool -genkey -noprompt -alias localhost -dname "${SSL_DN}" -keystore /var/private/ssl/server.keystore.jks --storepass ${SSL_PASSWORD} --keypass ${SSL_PASSWORD}
     fi
