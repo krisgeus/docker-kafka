@@ -1,0 +1,17 @@
+KafkaServer { 
+  com.sun.security.auth.module.Krb5LoginModule required
+  refreshKrb5Config=true
+  useKeyTab=true
+  keyTab="/kafka.keytab"
+  storeKey=true
+  principal="kafka/HOSTNAME"; 
+}; 
+
+Client { 
+  com.sun.security.auth.module.Krb5LoginModule required
+  refreshKrb5Config=true
+  useKeyTab=true
+  keyTab="/kafka.keytab"
+  storeKey=true
+  principal="kafka/HOSTNAME"; 
+}; 

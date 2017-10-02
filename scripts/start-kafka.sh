@@ -11,6 +11,29 @@
 # * INTER_BROKER: the listener name the internal connections will use
 
 # Allow specification of log retention policies
+
+# Configure kerberos for kafka
+if [ ! -z "$ENABLE_KERBEROS" ]; then
+    echo "set SASL mechanism"
+    if grep -r -q "^#\?sasl.enabled.mechanisms" $KAFKA_HOME/config/server.properties; then
+        sed -r -i "s/#?(sasl.enabled.mechanisms)=(.*)/\1=GSSAPI/g" $KAFKA_HOME/config/server.properties
+    else
+        echo "sasl.enabled.mechanisms=GSSAPI" >> $KAFKA_HOME/config/server.properties
+    fi
+
+    echo "set Kerberos service name for kafka"
+    if grep -r -q "^#\?sasl.kerberos.service.name" $KAFKA_HOME/config/server.properties; then
+        sed -r -i "s/#?(sasl.kerberos.service.name)=(.*)/\1=kafka/g" $KAFKA_HOME/config/server.properties
+    else
+        echo "sasl.kerberos.service.name=kafka" >> $KAFKA_HOME/config/server.properties
+    fi
+
+    echo "create jaas config based on template"
+    sed "s/HOSTNAME/$(hostname -f)/g" $KAFKA_HOME/config/kafka.jaas.tmpl > $KAFKA_HOME/config/kafka.jaas
+
+    export KAFKA_OPTS="-Djava.security.auth.login.config=${KAFKA_HOME}/config/kafka.jaas -Djava.security.krb5.conf=/etc/krb5.conf -Dsun.security.krb5.debug=true"
+fi
+
 if [ ! -z "$LOG_RETENTION_HOURS" ]; then
     echo "log retention hours: $LOG_RETENTION_HOURS"
     sed -r -i "s/#?(log.retention.hours)=(.*)/\1=$LOG_RETENTION_HOURS/g" $KAFKA_HOME/config/server.properties
@@ -92,5 +115,14 @@ if echo "$SECURITY_PROTOCOL_MAP" | grep -r -q ":SSL"; then
     echo "ssl.key.password=${SSL_PASSWORD}" >> $KAFKA_HOME/config/server.properties
 fi
 
-export EXTRA_ARGS='-name kafkaServer' # no -loggc to minimize logging
+if [ ! -z "$HOSTNAME" ]; then
+    echo "zookeeper connect string to $HOSTNAME"
+    if grep -r -q "^#\?zookeeper.connect=" $KAFKA_HOME/config/server.properties; then
+        sed -r -i "s/^#?(zookeeper.connect)=(.*)/\1=${HOSTNAME}:2181/g" $KAFKA_HOME/config/server.properties
+    else
+        echo "zookeeper.connect=${HOSTNAME}:2181" >> $KAFKA_HOME/config/server.properties
+    fi
+fi
+
+export EXTRA_ARGS="-name kafkaServer" # no -loggc to minimize logging
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
