@@ -97,7 +97,7 @@ if [ ! -z "$INTER_BROKER" ]; then
     fi
 fi
 
-if echo "$SECURITY_PROTOCOL_MAP" | grep -r -q ":SSL"; then
+if echo "$SECURITY_PROTOCOL_MAP" | grep -q ":SSL"; then
     if [ -z "$SSL_PASSWORD" ]; then
         SSL_PASSWORD=`date +%s | sha256sum | base64 | head -c 32`
     fi
