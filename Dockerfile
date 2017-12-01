@@ -11,7 +11,7 @@ ENV JAVA_HOME /opt/jdk1.8.0_151
 # Install Kafka, Zookeeper and other needed things
 RUN yum update -y && \
     yum install -y epel-release zip unzip && \
-    yum install -y wget nc openssl krb5-workstation krb5-libs && \
+    yum install -y wget supervisor nc openssl krb5-workstation krb5-libs && \
     wget -q \
         http://apache.mirrors.spacedump.net/kafka/"$KAFKA_VERSION"/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz \
         -O /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
