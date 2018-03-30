@@ -59,13 +59,13 @@ start(){
   # Start Topic creation
   echo "Starting topic creation..."
   # Wait for kafka broker to be available
-  while [ $(echo dump | nc divolte-kafka 2181 | grep brokers) == "" ]
+  while [ $(echo dump | nc $(hostname -s) 2181 | grep brokers) == "" ]
   do
     echo "Waiting for Kafka Broker to be available in zookeeper"
     sleep 10
   done
 
-  until echo exit | nc --send-only divolte-kafka 9092;
+  until echo exit | nc --send-only $(hostname -s) 9092;
   do 
     echo "Waiting for Kafka Broker to be really available"
     sleep 10
