@@ -144,3 +144,46 @@ ssl.truststore.location=client.truststore.jks
 ssl.truststore.password=secretpass
 ```
 
+## Kerberos consuming example
+
+You can use the ticket cache or the keytab to configure
+
+### TicketCache
+`kinit kafka/$(hostname -f) -kt /kafka.keytab`
+
+`vi /kafka-client.jaas`
+
+```
+KafkaClient {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useTicketCache=true
+  serviceName="kafka"
+  useKeyTab=false;
+};
+```
+
+```
+export KAFKA_OPTS="-Djava.security.auth.login.config=/kafka-client.jaas -Djava.security.krb5.conf=/etc/krb5.conf -Dsun.security.krb5.debug=false"
+
+${KAFKA_HOME}/kafka-console-consumer.sh --bootstrap-server $(hostname):9092 --topic divolte --from-beginning --consumer-property security.protocol=SASL_PLAINTEXT
+```
+
+### Keytab
+
+`vi /kafka-client-keytab.jaas`
+
+```
+KafkaClient {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  storeKey=true
+  keyTab="/kafka.keytab"
+  principal="kafka/divolte-kafka.divolte_divolte.io";
+};
+```
+
+```
+export KAFKA_OPTS="-Djava.security.auth.login.config=/kafka-client-keytab.jaas -Djava.security.krb5.conf=/etc/krb5.conf -Dsun.security.krb5.debug=false"
+
+${KAFKA_HOME}/kafka-console-consumer.sh --bootstrap-server $(hostname):9092 --topic divolte --from-beginning --consumer-property security.protocol=SASL_PLAINTEXT
+```
