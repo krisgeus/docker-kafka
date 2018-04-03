@@ -5,32 +5,17 @@ FROM centos
 ENV SCALA_VERSION 2.12
 ENV KAFKA_VERSION 0.10.2.1
 ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
-ENV JAVA_HOME /opt/jdk1.8.0_151
-
 
 # Install Kafka, Zookeeper and other needed things
 RUN yum update -y && \
     yum install -y epel-release zip unzip && \
-    yum install -y wget supervisor nc openssl krb5-workstation krb5-libs && \
+    yum install -y wget supervisor nc openssl krb5-workstation krb5-libs java && \
     wget -q \
         http://apache.mirrors.spacedump.net/kafka/"$KAFKA_VERSION"/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz \
         -O /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
     tar xfz /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -C /opt && \
     rm /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
-    wget -q --no-cookies --no-check-certificate \
-        --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" \
-        "http://download.oracle.com/otn-pub/java/jdk/8u151-b12/e758a0de34e24606bca991d704f6dcbf/jdk-8u151-linux-x64.tar.gz" \
-        -O /tmp/jdk-linux-x64.tar.gz && \
-    tar xfz /tmp/jdk-linux-x64.tar.gz -C /opt && \
-    rm /tmp/jdk-linux-x64.tar.gz && \
-    wget -q --no-cookies --no-check-certificate \
-        --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" \
-        "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip" \
-        -O /tmp/jce_policy-8.zip && \
-    unzip -j -o /tmp/jce_policy-8.zip -d $JAVA_HOME/jre/lib/security/ && \
-    rm -rf /tmp/jce_policy-8.zip && \
     yum clean all
-
 
 ADD scripts/start-all.sh /usr/bin/start-all.sh
 ADD scripts/start-kafka.sh /usr/bin/start-kafka.sh
