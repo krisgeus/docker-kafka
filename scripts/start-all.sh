@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # The full path of the lock file to use.
-LOCKFILE="/root/startscript-lock"
-EXPORT JAVA_HOME=$(readlink -f $(which java) | sed -e 's/\/bin\/java//g')
+LOCKFILE="/tmp/startscript-lock"
+export JAVA_HOME=$(readlink -f $(which java) | sed -e 's/\/bin\/java//g')
 
 start(){
   # Assert that there is no other Lambda instance, created with this script, running.
