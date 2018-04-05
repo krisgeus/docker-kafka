@@ -3,13 +3,13 @@
 FROM centos
 
 ENV SCALA_VERSION 2.12
-ENV KAFKA_VERSION 0.10.2.1
+ENV KAFKA_VERSION 1.1.0
 ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
 
 # Install Kafka, Zookeeper and other needed things
 RUN yum update -y && \
     yum install -y epel-release zip unzip && \
-    yum install -y wget supervisor nc openssl krb5-workstation krb5-libs java && \
+    yum install -y wget supervisor nc net-tools openssl krb5-workstation krb5-libs java which && \
     wget -q \
         http://apache.mirrors.spacedump.net/kafka/"$KAFKA_VERSION"/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz \
         -O /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \

@@ -13,6 +13,9 @@
 # Allow specification of log retention policies
 
 # Configure kerberos for kafka
+echo "Make sure new config items are put at end of config file even if no newline is present as final character in the config"
+echo >> $KAFKA_HOME/config/server.properties    
+
 if [ ! -z "$ENABLE_KERBEROS" ]; then
     echo "set SASL mechanism"
     if grep -r -q "^#\?sasl.enabled.mechanisms" $KAFKA_HOME/config/server.properties; then
@@ -98,21 +101,38 @@ if [ ! -z "$INTER_BROKER" ]; then
 fi
 
 if echo "$SECURITY_PROTOCOL_MAP" | grep -q ":SSL"; then
-    if [ -z "$SSL_PASSWORD" ]; then
-        SSL_PASSWORD=`date +%s | sha256sum | base64 | head -c 32`
+    if [ ! -f /var/private/ssl/server.keystore.jks ]; then
+        if [ -z "$SSL_PASSWORD" ]; then
+            SSL_PASSWORD=`date +%s | sha256sum | base64 | head -c 32`
+        fi
+        if [ ! -z "$SSL_CERT" ]; then
+            mkdir -p /var/private/ssl/server/
+            echo "${SSL_KEY}" >> /var/private/ssl/server/ssl.key
+            echo "${SSL_CERT}" >> /var/private/ssl/server/cert.pem
+            openssl pkcs12 -export -in /var/private/ssl/server/cert.pem -inkey /var/private/ssl/server/ssl.key -name localhost -password pass:${SSL_PASSWORD} -out /var/private/ssl/server/pkcs12.p12
+            ${JAVA_HOME}/bin/keytool -importkeystore -deststorepass ${SSL_PASSWORD} -destkeypass ${SSL_PASSWORD} -destkeystore /var/private/ssl/server.keystore.jks -srckeystore /var/private/ssl/server/pkcs12.p12 -srcstoretype PKCS12 -srcstorepass ${SSL_PASSWORD} -alias localhost
+        else  
+            ${JAVA_HOME}/bin/keytool -genkey -noprompt -alias localhost -dname "${SSL_DN}" -keystore /var/private/ssl/server.keystore.jks --storepass ${SSL_PASSWORD} --keypass ${SSL_PASSWORD}
+        fi
+        if grep -r -q "^#\?ssl.keystore.location=" $KAFKA_HOME/config/server.properties; then
+            # use | as a delimiter to make sure // does not confuse sed
+            sed -r -i "s|^#?(ssl.keystore.location)=(.*)|\1=/var/private/ssl/server.keystore.jks|g" $KAFKA_HOME/config/server.properties
+        else
+            echo "ssl.keystore.location=/var/private/ssl/server.keystore.jks" >> $KAFKA_HOME/config/server.properties
+        fi
+        if grep -r -q "^#\?ssl.keystore.password=" $KAFKA_HOME/config/server.properties; then
+            # use | as a delimiter to make sure // does not confuse sed
+            sed -r -i "s|^#?(ssl.keystore.password)=(.*)|\1=${SSL_PASSWORD}|g" $KAFKA_HOME/config/server.properties
+        else
+           echo "ssl.keystore.password=${SSL_PASSWORD}" >> $KAFKA_HOME/config/server.properties
+        fi
+        if grep -r -q "^#\?ssl.key.password=" $KAFKA_HOME/config/server.properties; then
+            # use | as a delimiter to make sure // does not confuse sed
+            sed -r -i "s|^#?(ssl.key.password)=(.*)|\1=${SSL_PASSWORD}|g" $KAFKA_HOME/config/server.properties
+        else
+            echo "ssl.key.password=${SSL_PASSWORD}" >> $KAFKA_HOME/config/server.properties
+        fi
     fi
-    if [ ! -z "$SSL_CERT" ]; then
-        mkdir -p /var/private/ssl/server/
-        echo "${SSL_KEY}" >> /var/private/ssl/server/ssl.key
-        echo "${SSL_CERT}" >> /var/private/ssl/server/cert.pem
-        openssl pkcs12 -export -in /var/private/ssl/server/cert.pem -inkey /var/private/ssl/server/ssl.key -name localhost -password pass:${SSL_PASSWORD} -out /var/private/ssl/server/pkcs12.p12
-        ${JAVA_HOME}/bin/keytool -importkeystore -deststorepass ${SSL_PASSWORD} -destkeypass ${SSL_PASSWORD} -destkeystore /var/private/ssl/server.keystore.jks -srckeystore /var/private/ssl/server/pkcs12.p12 -srcstoretype PKCS12 -srcstorepass ${SSL_PASSWORD} -alias localhost
-    else  
-        ${JAVA_HOME}/bin/keytool -genkey -noprompt -alias localhost -dname "${SSL_DN}" -keystore /var/private/ssl/server.keystore.jks --storepass ${SSL_PASSWORD} --keypass ${SSL_PASSWORD}
-    fi
-    echo "ssl.keystore.location=/var/private/ssl/server.keystore.jks" >> $KAFKA_HOME/config/server.properties
-    echo "ssl.keystore.password=${SSL_PASSWORD}" >> $KAFKA_HOME/config/server.properties
-    echo "ssl.key.password=${SSL_PASSWORD}" >> $KAFKA_HOME/config/server.properties
 fi
 
 if [ ! -z "$HOSTNAME" ]; then

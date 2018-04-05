@@ -2,6 +2,9 @@
 
 # Configure kerberos for zookeeper
 if [ ! -z "$ENABLE_KERBEROS" ]; then
+    echo "Make sure new config items are put at end of config file even if no newline is present as final character in the config"
+    echo >> $KAFKA_HOME/config/zookeeper.properties
+    
     echo "set authProvider.1 to SASLAuthenticationProvider"
     if grep -r -q "^#\?authProvider\.1" $KAFKA_HOME/config/zookeeper.properties; then
         sed -r -i "s/#?(authProvider\.1)=(.*)/\1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider/g" $KAFKA_HOME/config/zookeeper.properties
