@@ -3,7 +3,7 @@
 FROM centos
 
 ENV SCALA_VERSION 2.12
-ENV KAFKA_VERSION 1.1.0
+ENV KAFKA_VERSION 1.1.1
 ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
 
 # Install Kafka, Zookeeper and other needed things
