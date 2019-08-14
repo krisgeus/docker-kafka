@@ -8,7 +8,8 @@ ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
 
 # Install Kafka, Zookeeper and other needed things
 RUN yum update -y && \
-    yum install -y epel-release wget supervisor nc net-tools openssl krb5-workstation krb5-libs java which && \
+    yum install -y epel-release wget nc net-tools openssl krb5-workstation krb5-libs java which && \
+    yum install -y supervisor && \
     wget -q \
         http://apache.mirrors.spacedump.net/kafka/"$KAFKA_VERSION"/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz \
         -O /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
