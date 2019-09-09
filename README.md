@@ -31,10 +31,10 @@ Configuration of kafka can be changed/influenced by setting a set of environment
 
 ## Running the image
 To run the image with 2 topics, advertising an internal (9092) and external listener (443). This example is useful when you have some kind 
-of edge termination for ssl externally or port mapping, e.g. port 443 external SSL --> port 9092 internal.
+of edge termination for ssl externally or port mapping, e.g. port 443 external SSL --> port 9092 internal. To also make this example work if you don't have such ssl termination setup the portmapping 9092->9092 is added as an extra.
 
 ```
-docker run --rm -p 2181:2181 -p 9092:9092 -p 9093:9093 \
+docker run --rm -p 2181:2181 -p 443:9092 -p 9092:9092 -p 9093:9093 \
   --env ADVERTISED_LISTENERS=PLAINTEXT://kafka:443,INTERNAL://localhost:9093 \
   --env LISTENERS=PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:9093 \
   --env SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT \
