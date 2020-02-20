@@ -10,7 +10,7 @@ start(){
 
   # Create a lock file to prevent multiple instantiations.
   touch $LOCKFILE
-
+  
   if [ ! -z "$ENABLE_KERBEROS" ]; then
     # Start Kerberos keytab creation
     echo "Starting keytab creation..."
@@ -57,6 +57,28 @@ start(){
     echo "Kafka has been started!"
   fi
 
+  until echo exit | nc --send-only $(hostname -s) 9092;
+  do 
+    echo "Waiting for Kafka Broker to be really available"
+    sleep 10
+  done
+
+  # Start Schema registry on master node.
+  echo "Starting schema registry..."
+  supervisorctl start schemaregistry
+  # Wait for Kafka to start.
+  while [ "$(supervisorctl status schemaregistry | tr -s ' ' | cut -f2 -d' ')" == "STARTING" ] 
+  do
+    sleep 10
+  done
+  schema_status=$(supervisorctl status schemaregistry | tr -s ' ' | cut -f2 -d' ')
+  if [ "$schema_status" != "RUNNING" ]
+  then
+    echo "SchemaRegistry has failed to start with code $schema_status."
+  else
+    echo "SchemaRegistry has been started!"
+  fi  
+
   # Start Topic creation
   echo "Starting topic creation..."
   # Wait for kafka broker to be available
@@ -66,11 +88,6 @@ start(){
     sleep 10
   done
 
-  until echo exit | nc --send-only $(hostname -s) 9092;
-  do 
-    echo "Waiting for Kafka Broker to be really available"
-    sleep 10
-  done
 
   /usr/bin/create-kafka-topics.sh >> $KAFKA_HOME/logs/create-kafka-topics.log
   returnedValue=$?
@@ -92,6 +109,17 @@ start(){
 }
 
 stop(){
+
+  # Stop Schema Registry.
+  supervisorctl stop schemaregistry
+  schema_status=$(supervisorctl status schemaregistry | tr -s ' ' | cut -f2 -d' ')
+  if [ "$schema_status" == "STOPPED" ]
+  then
+    echo "SchemaRegistry has been stopped!"
+  else
+    echo "SchemaRegistry has failed to stop with returned code $schema_status"
+  fi
+
   # Stop Kafka.
   supervisorctl stop kafka
   kafka_status=$(supervisorctl status kafka | tr -s ' ' | cut -f2 -d' ')
