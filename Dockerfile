@@ -41,6 +41,7 @@ ADD scripts/start-kafka.sh /usr/bin/start-kafka.sh
 ADD scripts/start-zookeeper.sh /usr/bin/start-zookeeper.sh
 ADD scripts/start-schemaregistry.sh /usr/bin/start-schemaregistry.sh
 ADD scripts/create-kafka-topics.sh /usr/bin/create-kafka-topics.sh
+ADD scripts/configureKerberosClient.sh /usr/bin/configureKerberosClient.sh
 
 ADD config/log4j.properties config/zookeeper.jaas.tmpl config/kafka.jaas.tmpl "$KAFKA_HOME"/config/
 ADD config/schema-registry.properties "$SCHEMA_REGISTRY_HOME"/config/

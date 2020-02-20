@@ -10,6 +10,20 @@ start(){
 
   # Create a lock file to prevent multiple instantiations.
   touch $LOCKFILE
+  
+  if [ ! -z "$ENABLE_KERBEROS" ]; then
+    # Start Kerberos keytab creation
+    echo "Starting keytab creation..."
+    /usr/bin/configureKerberosClient.sh
+    returnedValue=$?
+    if [ $returnedValue -eq 0 ]
+    then
+      echo "Krb5 configuration has been started!"
+    else
+      echo "Krb5 configuration has failed to start with code $returnedValue."
+      return $returnedValue
+    fi
+  fi
 
   # Start Zookeeper.
   echo "Starting Zookeeper..."
